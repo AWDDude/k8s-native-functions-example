@@ -6,7 +6,7 @@ IFS=$'\n\t'
 CLUSTER_NAME="k8s-func"
 
 main(){
-	validate_tools "k3d" "jq" "kubectl"
+	validate_tools "k3d" "jq" "kubectl" "git"
 
 	local clusters
 	clusters=$(k3d_list_clusters)
@@ -16,11 +16,18 @@ main(){
 			echo "changing kubectl context to ${CLUSTER_NAME}"
 			kubectl_use_context "${CLUSTER_NAME}"
 		fi
-		exit 0
 	fi
 
 	echo "creating local ${CLUSTER_NAME} k8s cluster"
 	k3d_create_cluster "${CLUSTER_NAME}"
+
+	echo "starting git daemon"
+	git_daemon
+}
+
+git_daemon(){
+	echo "press [CTRL]+C to exit"
+	git daemon --base-path=. --export-all --reuseaddr --informative-errors --verbose
 }
 
 kubectl_current_context(){
